@@ -13,6 +13,16 @@ class Product(models.Model):
     def __str__(self):
         return f'{self.author} {self.product_name} {self.date_time_started} {self.price} {self.min_group_size} {self.max_group_size}'
 
+    @property
+    def count_lessons(self):
+        lessons = self.lessons.all()
+        cnt = lessons.count
+        return cnt
+
+    @property
+    def date_started(self):
+        return (self.date_time_started).strftime("%d.%m.%Y %H:%M")
+
 
 class ProductAccess(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -36,8 +46,8 @@ class Lesson(models.Model):
 
 class ProductGroup(models.Model):
     group_name = models.CharField(max_length=64)
-    student = models.ForeignKey(User, on_delete=models.PROTECT)
+    students = models.ManyToManyField(User)
     product = models.ForeignKey(Product, related_name='groups', on_delete=models.PROTECT)
 
     def __str__(self):
-        return f'{self.group_name} {self.student.username} {self.product.product_name}'
+        return f'{self.group_name} {self.product.product_name}'
