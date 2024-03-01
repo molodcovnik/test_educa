@@ -2,6 +2,12 @@ from rest_framework import serializers
 from catalog.models import Product, ProductGroup, ProductAccess, Lesson
 
 
+# class StudentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ("id", "username", )
+
+
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
@@ -28,3 +34,13 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ("id", "author", "product_name", "lessons",  "date_started", "price")
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    total_members = serializers.IntegerField()
+
+    class Meta:
+        model = ProductGroup
+        fields = ("id", "group_name", "total_members", )
+
+

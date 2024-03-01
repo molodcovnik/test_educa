@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class Product(models.Model):
@@ -22,6 +23,11 @@ class Product(models.Model):
     @property
     def date_started(self):
         return (self.date_time_started).strftime("%d.%m.%Y %H:%M")
+
+    @property
+    def get_course_is_started(self):
+        today = timezone.now()
+        return today >= self.date_time_started
 
 
 class ProductAccess(models.Model):

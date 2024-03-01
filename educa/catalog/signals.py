@@ -17,10 +17,8 @@ def created_access(sender, instance, created, **kwargs):
         product = instance.product
         user = instance.user
         number_for_new_group = random_code()
-        # print(product)
         group_max = product.max_group_size
         group_min = product.min_group_size
-        print(group_max)
         groups = ProductGroup.objects.filter(product=product)
         if len(groups) <= 0:
             product_name = f'{instance.product.product_name}_{number_for_new_group}'
