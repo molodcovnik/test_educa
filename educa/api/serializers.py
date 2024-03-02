@@ -2,12 +2,6 @@ from rest_framework import serializers
 from catalog.models import Product, ProductGroup, ProductAccess, Lesson
 
 
-# class StudentSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ("id", "username", )
-
-
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
@@ -24,16 +18,21 @@ class ProductsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ("id", "author", "product_name", "total_lessons",  "date_time_started", "price")
+        fields = ("id", "author", "product_name", "total_lessons",  "date_time_started", "price", )
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True)
     date_started = serializers.ReadOnlyField()
+    statistics = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_statistics(obj):
+        return f'http://127.0.0.1:8000/api/statistics/{obj.pk}'
 
     class Meta:
         model = Product
-        fields = ("id", "author", "product_name", "lessons",  "date_started", "price")
+        fields = ("id", "author", "product_name", "lessons",  "date_started", "price", "statistics")
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -42,5 +41,3 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductGroup
         fields = ("id", "group_name", "total_members", )
-
-

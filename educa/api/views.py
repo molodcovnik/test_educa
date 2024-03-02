@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
-from django.db.models import Count, F, Q
+from django.db import models
+from django.db.models import Count, F, Q, ExpressionWrapper, Func
+from django.db.models.functions import Cast
 from django.http import Http404, JsonResponse
 from django.shortcuts import render
 from rest_framework import status
@@ -143,4 +145,43 @@ class GroupsRefactorView(APIView):
             ProductGroup.objects.filter(id__in=after_removed).delete()
 
         data = {"Success": "Groups successfully formatted"}
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class Round(Func):
+    function = 'ROUND'
+    arity = 2
+
+
+class StatisticsView(APIView):
+    def get_object(self, pk):
+        try:
+            return Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        users = User.objects.all().exclude(id=1).count()
+        product = Product.objects.filter(id=pk)
+        total_groups = self.get_object(pk).groups.all().count()
+
+        data = (product.annotate(
+                    total=Count("accesses__user", distinct=True),
+                    percent=F("total") + users,
+                    group_size=F("max_group_size"))
+                .annotate(
+                    groups_cnt=Count("groups", distinct=True)
+                )
+                .annotate(
+                    medium_group=Cast(F("total") / float(total_groups), models.FloatField()),
+                )
+                .annotate(
+                    group_occupancy_percentage=Cast(Round(F("medium_group") / F("group_size") * 100, 2), models.FloatField())
+                )
+                .annotate(
+                    product_purchase_percentage=Cast(Round(F("total") / float(users) * 100, 2), models.FloatField())
+                )
+                .values("product_name", "total", "group_occupancy_percentage", "product_purchase_percentage"))
+
+        # print(data)
         return Response(data, status=status.HTTP_200_OK)
